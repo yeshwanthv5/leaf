@@ -14,7 +14,7 @@ from utils.tf_utils import graph_size
 
 class Model(ABC):
 
-    def __init__(self, seed, lr, optimizer=None):
+    def __init__(self, seed, lr, optimizer=None, checkpoint_dir=None):
         self.lr = lr
         self.seed = seed
         self._optimizer = optimizer
@@ -30,6 +30,8 @@ class Model(ABC):
 
         with self.graph.as_default():
             self.sess.run(tf.global_variables_initializer())
+            if checkpoint_dir != None:
+                self.saver.restore(self.sess,tf.train.latest_checkpoint(checkpoint_dir))
 
             metadata = tf.RunMetadata()
             opts = tf.profiler.ProfileOptionBuilder.float_operation()

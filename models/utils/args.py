@@ -72,4 +72,10 @@ def parse_args():
                     default=-1,
                     required=False)
 
+    parser.add_argument('--checkpoint_dir',
+                    help='Directory for the checkpoint if loading from a pretrained model;',
+                    type=str,
+                    default=None,
+                    required=False)
+
     return parser.parse_args()

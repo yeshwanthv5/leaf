@@ -8,9 +8,9 @@ IMAGE_SIZE = 28
 
 
 class ClientModel(Model):
-    def __init__(self, seed, lr, num_classes):
+    def __init__(self, seed, lr, num_classes, checkpoint_dir=None):
         self.num_classes = num_classes
-        super(ClientModel, self).__init__(seed, lr)
+        super(ClientModel, self).__init__(seed, lr, checkpoint_dir=checkpoint_dir)
 
     def create_model(self):
         """Model function for CNN."""

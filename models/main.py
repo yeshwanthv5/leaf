@@ -55,7 +55,8 @@ def main():
 
     # Create client model, and share params with server model
     tf.reset_default_graph()
-    client_model = ClientModel(args.seed, *model_params)
+    # client_model = ClientModel(args.seed, *model_params)
+    client_model = ClientModel(args.seed, *model_params, checkpoint_dir=args.checkpoint_dir)
 
     # Create server
     server = Server(client_model)

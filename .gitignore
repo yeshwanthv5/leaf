@@ -7,9 +7,11 @@ models/__pycache__/
 models/*/__pycache__/
 models/*/preprocess/__pycache__/
 utils/__pycache__/
-models/checkpoints/
+models/checkpoint*
 models/metrics/*.csv
 models/sent140/embs.json
 _build/
 _templates/
 autodoc/
+results/
+*.ipynb_checkpoints*
