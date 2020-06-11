@@ -16,6 +16,7 @@ SAMPLING_SEED="" # --smplseed, seed specified for sampling of data
 SPLIT_SEED="" # --spltseed, seed specified for train/test data split
 NO_CHECKSUM="" # --nochecksum, disable creation of MD5 checksum file after data gen
 VERIFICATION_FILE="" # --verify <fname>, check if JSON files' MD5 matches given digest
+MAX_WRITERS=100 # --mw tag, Maximum # of users per json file
 
 META_DIR='meta'
 CHECKSUM_FNAME="${META_DIR}/dir-checksum.md5"
@@ -58,6 +59,15 @@ case $key in
     shift # past argument
     if [ ${SFRAC:0:1} = "-" ]; then
         SFRAC=""
+    else
+        shift # past value
+    fi
+    ;;
+    --mw)
+    MAX_WRITERS="$2"
+    shift # past argument
+    if [ ${MAX_WRITERS:0:1} = "-" ]; then
+        MAX_WRITERS=""
     else
         shift # past value
     fi
@@ -146,7 +156,7 @@ META_DIR=`realpath ${META_DIR}`
 
 if [ ! -d "data/all_data" ]; then
     cd preprocess
-    ./data_to_json.sh
+    ./data_to_json.sh $MAX_WRITERS
     cd ..
 fi
 
