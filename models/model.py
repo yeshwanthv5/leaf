@@ -107,7 +107,7 @@ class Model(ABC):
                         self.labels: target_data
                     })
 
-    def test(self, data):
+    def test(self, data, batch_size=10):
         """
         Tests the current model on the given data.
 
@@ -116,14 +116,23 @@ class Model(ABC):
         Return:
             dict of metrics that will be recorded by the simulation.
         """
-        x_vecs = self.process_x(data['x'])
-        labels = self.process_y(data['y'])
-        with self.graph.as_default():
-            tot_acc, loss = self.sess.run(
-                [self.eval_metric_ops, self.loss],
-                feed_dict={self.features: x_vecs, self.labels: labels}
-            )
-        acc = float(tot_acc) / x_vecs.shape[0]
+        tot_wtd_acc = 0
+        tot_wtd_loss = 0
+        count = 0
+        for batched_x, batched_y in batch_data(data, batch_size, seed=self.seed):
+            input_data = self.process_x(batched_x)
+            target_data = self.process_y(batched_y)
+            with self.graph.as_default():
+                batch_tot_acc, batch_loss = self.sess.run(
+                    [self.eval_metric_ops, self.loss],
+                    feed_dict={self.features: input_data, self.labels: target_data}
+                )
+            tot_wtd_acc += batch_tot_acc
+            tot_wtd_loss += batch_loss * input_data.shape[0]
+            count += input_data.shape[0]
+
+        acc = tot_wtd_acc/count
+        loss = tot_wtd_loss/count
         return {ACCURACY_KEY: acc, 'loss': loss}
 
     def close(self):
