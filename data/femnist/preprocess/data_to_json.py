@@ -19,8 +19,8 @@ sys.path.append(utils_dir)
 
 import util
 
-MAX_WRITERS = 100  # max number of writers per json file.
-
+MAX_WRITERS = int(sys.argv[1])  # max number of writers per json file.
+print("Max writers per JSON",MAX_WRITERS)
 
 def relabel_class(c):
     '''
@@ -94,3 +94,25 @@ for (w, l) in writers:
         users[:] = []
         num_samples[:] = []
         user_data.clear()
+
+# Handle the last few users
+if writer_count > 0:
+    all_data = {}
+    all_data['users'] = users
+    all_data['num_samples'] = num_samples
+    all_data['user_data'] = user_data
+
+    file_name = 'all_data_%d.json' % json_index
+    file_path = os.path.join(parent_path, 'data', 'all_data', file_name)
+
+    print('writing %s' % file_name)
+
+    with open(file_path, 'w') as outfile:
+        json.dump(all_data, outfile)
+
+    writer_count = 0
+    json_index += 1
+
+    users[:] = []
+    num_samples[:] = []
+    user_data.clear()
