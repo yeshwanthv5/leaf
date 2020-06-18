@@ -8,6 +8,7 @@ import os
 import random
 import time
 import sys
+import numpy as np
 
 from collections import OrderedDict
 
@@ -119,6 +120,8 @@ files = [f for f in files if f.endswith('.json')]
 
 rng_seed = (args.seed if (args.seed is not None and args.seed >= 0) else int(time.time()))
 rng = random.Random(rng_seed)
+np.random.seed(rng_seed)
+
 if os.environ.get('LEAF_DATA_META_DIR') is not None:
     seed_fname = os.path.join(os.environ.get('LEAF_DATA_META_DIR'), SEED_FILES['split'])
     with open(seed_fname, 'w+') as f:
@@ -202,20 +205,21 @@ else:
             curr_num_samples = len(data['user_data'][u]['y'])
             if curr_num_samples >= 2:
                 # ensures number of train and test samples both >= 1
+                print("Num samples", curr_num_samples)
                 num_train_samples = max(1, int(args.frac * curr_num_samples))
                 if curr_num_samples == 2:
                     num_train_samples = 1
 
                 num_test_samples = curr_num_samples - num_train_samples
 
-                indices = [j for j in range(curr_num_samples)]
                 if args.name in ['shakespeare']:
                     train_indices = [i for i in range(num_train_samples)]
                     test_indices = [i for i in range(num_train_samples + 80 - 1, curr_num_samples)]
                 else:
-                    train_indices = rng.sample(indices, num_train_samples)                    
+                    train_indices = np.random.choice(curr_num_samples, num_train_samples, replace=False)
                     test_indices = [i for i in range(curr_num_samples) if i not in train_indices]
-                
+                print("training samples:", len(train_indices))
+                print("testing samples:", len(test_indices))
                 if len(train_indices) >= 1 and len(test_indices) >= 1:
                     user_indices.append(i)
                     num_samples_train.append(num_train_samples)
@@ -230,8 +234,9 @@ else:
                         train_blist[j] = True
                     for j in test_indices:
                         test_blist[j] = True
-
                     for j in range(curr_num_samples):
+                        if(j % 1000 == 0):
+                            print("Samples Processed:", j)
                         if (train_blist[j]):
                             user_data_train[u]['x'].append(data['user_data'][u]['x'][j])
                             user_data_train[u]['y'].append(data['user_data'][u]['y'][j])
