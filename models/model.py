@@ -11,6 +11,7 @@ from baseline_constants import ACCURACY_KEY
 from utils.model_utils import batch_data
 from utils.tf_utils import graph_size
 
+from tensorflow.python.tools import inspect_checkpoint as inch
 
 class Model(ABC):
 
@@ -20,17 +21,25 @@ class Model(ABC):
         self._optimizer = optimizer
 
         self.graph = tf.Graph()
-        with self.graph.as_default():
+        with self.graph.as_default() as g:
             tf.set_random_seed(123 + self.seed)
             self.features, self.labels, self.train_op, self.eval_metric_ops, self.loss = self.create_model()
-            self.saver = tf.train.Saver()
+            self.saver = tf.train.Saver(var_list={"conv1/bias/.ATTRIBUTES/VARIABLE_VALUE": g.get_tensor_by_name("conv2d/bias:0"),"conv2/bias/.ATTRIBUTES/VARIABLE_VALUE": g.get_tensor_by_name("conv2d_1/bias:0"),"conv2/kernel/.ATTRIBUTES/VARIABLE_VALUE": g.get_tensor_by_name("conv2d_1/kernel:0"), "d1/bias/.ATTRIBUTES/VARIABLE_VALUE": g.get_tensor_by_name("dense/bias:0")})
+            # self.saver = tf.train.Saver(var_list={"conv1/bias/.ATTRIBUTES/VARIABLE_VALUE": g.get_tensor_by_name("conv2d/bias:0"), "conv1/kernel/.ATTRIBUTES/VARIABLE_VALUE": g.get_tensor_by_name("conv2d/kernel:0"),"conv2/bias/.ATTRIBUTES/VARIABLE_VALUE": g.get_tensor_by_name("conv2d_1/bias:0"),"conv2/kernel/.ATTRIBUTES/VARIABLE_VALUE": g.get_tensor_by_name("conv2d_1/kernel:0"), "d1/bias/.ATTRIBUTES/VARIABLE_VALUE": g.get_tensor_by_name("dense/bias:0"), "d1/kernel/.ATTRIBUTES/VARIABLE_VALUE": g.get_tensor_by_name("dense/kernel:0"), "d2/bias/.ATTRIBUTES/VARIABLE_VALUE": g.get_tensor_by_name("dense_1/bias:0"), "d2/kernel/.ATTRIBUTES/VARIABLE_VALUE": g.get_tensor_by_name("dense_1/kernel:0")})
+            # self.saver = tf.train.Saver()
         self.sess = tf.Session(graph=self.graph)
 
         self.size = graph_size(self.graph)
 
-        with self.graph.as_default():
+        with self.graph.as_default() as g:
             self.sess.run(tf.global_variables_initializer())
             if checkpoint_dir != None:
+                variables_in_checkpoint = tf.train.list_variables('./checkpoint/my_checkpoint')
+                print("Variables found in checkpoint file",variables_in_checkpoint)
+                all_vars = tf.global_variables()
+                print(all_vars)
+                print(g.get_tensor_by_name("conv2d/kernel:0"))
+                # exit()
                 self.saver.restore(self.sess,tf.train.latest_checkpoint(checkpoint_dir))
 
             metadata = tf.RunMetadata()
