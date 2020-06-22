@@ -20,7 +20,10 @@ sys.path.append(utils_dir)
 import util
 
 MAX_WRITERS = int(sys.argv[1])  # max number of writers per json file.
-print("Max writers per JSON",MAX_WRITERS)
+print("Max writers per JSON", MAX_WRITERS)
+
+DATA_PARTITION = int(sys.argv[2]) # 0 - Full data. 1 - (0-4 digits A-M, a-m) 2 - (5-9 digits N-Z, n-z)
+print("Data partition:", DATA_PARTITION)
 
 def relabel_class(c):
     '''
@@ -69,8 +72,17 @@ for (w, l) in writers:
 
         nc = relabel_class(c)
 
-        user_data[w]['x'].append(vec)
-        user_data[w]['y'].append(nc)
+        if DATA_PARTITION == 1:
+            if (nc >= 0 and nc <= 4) or (nc >= 10 and nc <= 22) or (nc >= 36 and nc <= 48):
+                user_data[w]['x'].append(vec)
+                user_data[w]['y'].append(nc)
+        elif DATA_PARTITION == 2:
+            if (nc >= 5 and nc <= 9) or (nc >= 23 and nc <= 35) or (nc >= 49 and nc <= 61):
+                user_data[w]['x'].append(vec)
+                user_data[w]['y'].append(nc)
+        else:
+            user_data[w]['x'].append(vec)
+            user_data[w]['y'].append(nc)
 
     writer_count += 1
     if writer_count == MAX_WRITERS:

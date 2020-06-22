@@ -17,6 +17,7 @@ SPLIT_SEED="" # --spltseed, seed specified for train/test data split
 NO_CHECKSUM="" # --nochecksum, disable creation of MD5 checksum file after data gen
 VERIFICATION_FILE="" # --verify <fname>, check if JSON files' MD5 matches given digest
 MAX_WRITERS=100 # --mw tag, Maximum # of users per json file
+DATA_PARTITION=0 # --dp tag, How to partition data - 0: Fill, 1: first half, 2: second half
 
 META_DIR='meta'
 CHECKSUM_FNAME="${META_DIR}/dir-checksum.md5"
@@ -68,6 +69,15 @@ case $key in
     shift # past argument
     if [ ${MAX_WRITERS:0:1} = "-" ]; then
         MAX_WRITERS=""
+    else
+        shift # past value
+    fi
+    ;;
+    --dp)
+    DATA_PARTITION="$2"
+    shift # past argument
+    if [ ${DATA_PARTITION:0:1} = "-" ]; then
+        DATA_PARTITION=""
     else
         shift # past value
     fi
@@ -156,7 +166,7 @@ META_DIR=`realpath ${META_DIR}`
 
 if [ ! -d "data/all_data" ]; then
     cd preprocess
-    ./data_to_json.sh $MAX_WRITERS
+    ./data_to_json.sh $MAX_WRITERS $DATA_PARTITION
     cd ..
 fi
 

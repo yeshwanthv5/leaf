@@ -51,6 +51,6 @@ fi
 if [ ! "$(ls -A ../data/all_data)" ]; then
   echo "------------------------------"
   echo "converting data to .json format"
-  python3 data_to_json.py $1
+  python3 data_to_json.py $1 $2
   echo "finished converting data to .json format"
 fi
